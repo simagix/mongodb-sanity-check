@@ -5,19 +5,19 @@ A simple sanity check tool written in GO.  Execute the binary without installing
 - Download [mcheck-linux-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-linux-x64)
 - Run as, for example
 ```
-$ mcheck-linux-64 mongodb://localhost:27017
+$ mcheck-linux-x64 mongodb://localhost:27017
 ```
 ### On OS X
 - Download [mcheck-osx-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-osx-x64)
 - Run as, for example
 ```
-$ mcheck-osx-64 mongodb://localhost:27017
+$ mcheck-osx-x64 mongodb://localhost:27017
 ```
 ### On Windows
 - Download [mcheck-win-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-win-x64)
 - Run as, for example
 ```
-> mcheck-win-64 mongodb://localhost:27017
+> mcheck-win-x64 mongodb://localhost:27017
 ```
 ## Develop, Build, and Execute
 ```

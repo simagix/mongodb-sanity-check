@@ -73,6 +73,7 @@ func connectMongo(mongoURI string, total int, thread int) {
 	    }
 	    elapsed = time.Since(start)
 	    log.Printf("%d updates took %s", total, elapsed)
+        fmt.Println("")
 
         bnum = bnum + total
         time.Sleep(time.Millisecond * 100)
