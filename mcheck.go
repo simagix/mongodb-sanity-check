@@ -92,7 +92,6 @@ func connectMongo(mongoURI string, total int, thread int) {
     }
 
     fmt.Println("Updated:", result.Updated)
-    fmt.Println("=== END ===")
 }
 
 func main() {
