@@ -1,0 +1,419 @@
+{
+	"queryPlanner" : {
+		"plannerVersion" : 1,
+		"namespace" : "archive.logs",
+		"indexFilterSet" : false,
+		"parsedQuery" : {
+			"$or" : [
+				{
+					"stats" : {
+						"$elemMatch" : {
+							"$and" : [
+								{
+									"src" : {
+										"$eq" : "cpu"
+									}
+								},
+								{
+									"pct" : {
+										"$gte" : 80
+									}
+								}
+							]
+						}
+					}
+				},
+				{
+					"stats" : {
+						"$elemMatch" : {
+							"$and" : [
+								{
+									"src" : {
+										"$eq" : "mem"
+									}
+								},
+								{
+									"pct" : {
+										"$gte" : 90
+									}
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"winningPlan" : {
+			"stage" : "SUBPLAN",
+			"inputStage" : {
+				"stage" : "SORT",
+				"sortPattern" : {
+					"dt" : -1
+				},
+				"inputStage" : {
+					"stage" : "SORT_KEY_GENERATOR",
+					"inputStage" : {
+						"stage" : "OR",
+						"inputStages" : [
+							{
+								"stage" : "FETCH",
+								"filter" : {
+									"stats" : {
+										"$elemMatch" : {
+											"$and" : [
+												{
+													"src" : {
+														"$eq" : "cpu"
+													}
+												},
+												{
+													"pct" : {
+														"$gte" : 80
+													}
+												}
+											]
+										}
+									}
+								},
+								"inputStage" : {
+									"stage" : "IXSCAN",
+									"keyPattern" : {
+										"stats.src" : 1,
+										"stats.pct" : 1,
+										"dt" : -1
+									},
+									"indexName" : "stats.src_1_stats.pct_1_dt_-1",
+									"isMultiKey" : true,
+									"multiKeyPaths" : {
+										"stats.src" : [
+											"stats"
+										],
+										"stats.pct" : [
+											"stats"
+										],
+										"dt" : [ ]
+									},
+									"isUnique" : false,
+									"isSparse" : false,
+									"isPartial" : false,
+									"indexVersion" : 2,
+									"direction" : "forward",
+									"indexBounds" : {
+										"stats.src" : [
+											"[\"cpu\", \"cpu\"]"
+										],
+										"stats.pct" : [
+											"[80.0, inf.0]"
+										],
+										"dt" : [
+											"[MaxKey, MinKey]"
+										]
+									}
+								}
+							},
+							{
+								"stage" : "FETCH",
+								"filter" : {
+									"stats" : {
+										"$elemMatch" : {
+											"$and" : [
+												{
+													"src" : {
+														"$eq" : "mem"
+													}
+												},
+												{
+													"pct" : {
+														"$gte" : 90
+													}
+												}
+											]
+										}
+									}
+								},
+								"inputStage" : {
+									"stage" : "IXSCAN",
+									"keyPattern" : {
+										"stats.src" : 1,
+										"stats.pct" : 1,
+										"dt" : -1
+									},
+									"indexName" : "stats.src_1_stats.pct_1_dt_-1",
+									"isMultiKey" : true,
+									"multiKeyPaths" : {
+										"stats.src" : [
+											"stats"
+										],
+										"stats.pct" : [
+											"stats"
+										],
+										"dt" : [ ]
+									},
+									"isUnique" : false,
+									"isSparse" : false,
+									"isPartial" : false,
+									"indexVersion" : 2,
+									"direction" : "forward",
+									"indexBounds" : {
+										"stats.src" : [
+											"[\"mem\", \"mem\"]"
+										],
+										"stats.pct" : [
+											"[90.0, inf.0]"
+										],
+										"dt" : [
+											"[MaxKey, MinKey]"
+										]
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		"rejectedPlans" : [ ]
+	},
+	"executionStats" : {
+		"executionSuccess" : true,
+		"nReturned" : 396,
+		"executionTimeMillis" : 2,
+		"totalKeysExamined" : 420,
+		"totalDocsExamined" : 420,
+		"executionStages" : {
+			"stage" : "SUBPLAN",
+			"nReturned" : 396,
+			"executionTimeMillisEstimate" : 0,
+			"works" : 820,
+			"advanced" : 396,
+			"needTime" : 423,
+			"needYield" : 0,
+			"saveState" : 6,
+			"restoreState" : 6,
+			"isEOF" : 1,
+			"invalidates" : 0,
+			"inputStage" : {
+				"stage" : "SORT",
+				"nReturned" : 396,
+				"executionTimeMillisEstimate" : 0,
+				"works" : 819,
+				"advanced" : 396,
+				"needTime" : 423,
+				"needYield" : 0,
+				"saveState" : 6,
+				"restoreState" : 6,
+				"isEOF" : 1,
+				"invalidates" : 0,
+				"sortPattern" : {
+					"dt" : -1
+				},
+				"memUsage" : 78408,
+				"memLimit" : 33554432,
+				"inputStage" : {
+					"stage" : "SORT_KEY_GENERATOR",
+					"nReturned" : 396,
+					"executionTimeMillisEstimate" : 0,
+					"works" : 423,
+					"advanced" : 396,
+					"needTime" : 26,
+					"needYield" : 0,
+					"saveState" : 6,
+					"restoreState" : 6,
+					"isEOF" : 1,
+					"invalidates" : 0,
+					"inputStage" : {
+						"stage" : "OR",
+						"nReturned" : 396,
+						"executionTimeMillisEstimate" : 0,
+						"works" : 422,
+						"advanced" : 396,
+						"needTime" : 25,
+						"needYield" : 0,
+						"saveState" : 6,
+						"restoreState" : 6,
+						"isEOF" : 1,
+						"invalidates" : 0,
+						"dupsTested" : 420,
+						"dupsDropped" : 24,
+						"recordIdsForgotten" : 0,
+						"inputStages" : [
+							{
+								"stage" : "FETCH",
+								"filter" : {
+									"stats" : {
+										"$elemMatch" : {
+											"$and" : [
+												{
+													"src" : {
+														"$eq" : "cpu"
+													}
+												},
+												{
+													"pct" : {
+														"$gte" : 80
+													}
+												}
+											]
+										}
+									}
+								},
+								"nReturned" : 271,
+								"executionTimeMillisEstimate" : 0,
+								"works" : 272,
+								"advanced" : 271,
+								"needTime" : 0,
+								"needYield" : 0,
+								"saveState" : 6,
+								"restoreState" : 6,
+								"isEOF" : 1,
+								"invalidates" : 0,
+								"docsExamined" : 271,
+								"alreadyHasObj" : 0,
+								"inputStage" : {
+									"stage" : "IXSCAN",
+									"nReturned" : 271,
+									"executionTimeMillisEstimate" : 0,
+									"works" : 272,
+									"advanced" : 271,
+									"needTime" : 0,
+									"needYield" : 0,
+									"saveState" : 6,
+									"restoreState" : 6,
+									"isEOF" : 1,
+									"invalidates" : 0,
+									"keyPattern" : {
+										"stats.src" : 1,
+										"stats.pct" : 1,
+										"dt" : -1
+									},
+									"indexName" : "stats.src_1_stats.pct_1_dt_-1",
+									"isMultiKey" : true,
+									"multiKeyPaths" : {
+										"stats.src" : [
+											"stats"
+										],
+										"stats.pct" : [
+											"stats"
+										],
+										"dt" : [ ]
+									},
+									"isUnique" : false,
+									"isSparse" : false,
+									"isPartial" : false,
+									"indexVersion" : 2,
+									"direction" : "forward",
+									"indexBounds" : {
+										"stats.src" : [
+											"[\"cpu\", \"cpu\"]"
+										],
+										"stats.pct" : [
+											"[80.0, inf.0]"
+										],
+										"dt" : [
+											"[MaxKey, MinKey]"
+										]
+									},
+									"keysExamined" : 271,
+									"seeks" : 1,
+									"dupsTested" : 271,
+									"dupsDropped" : 0,
+									"seenInvalidated" : 0
+								}
+							},
+							{
+								"stage" : "FETCH",
+								"filter" : {
+									"stats" : {
+										"$elemMatch" : {
+											"$and" : [
+												{
+													"src" : {
+														"$eq" : "mem"
+													}
+												},
+												{
+													"pct" : {
+														"$gte" : 90
+													}
+												}
+											]
+										}
+									}
+								},
+								"nReturned" : 149,
+								"executionTimeMillisEstimate" : 0,
+								"works" : 150,
+								"advanced" : 149,
+								"needTime" : 0,
+								"needYield" : 0,
+								"saveState" : 6,
+								"restoreState" : 6,
+								"isEOF" : 1,
+								"invalidates" : 0,
+								"docsExamined" : 149,
+								"alreadyHasObj" : 0,
+								"inputStage" : {
+									"stage" : "IXSCAN",
+									"nReturned" : 149,
+									"executionTimeMillisEstimate" : 0,
+									"works" : 150,
+									"advanced" : 149,
+									"needTime" : 0,
+									"needYield" : 0,
+									"saveState" : 6,
+									"restoreState" : 6,
+									"isEOF" : 1,
+									"invalidates" : 0,
+									"keyPattern" : {
+										"stats.src" : 1,
+										"stats.pct" : 1,
+										"dt" : -1
+									},
+									"indexName" : "stats.src_1_stats.pct_1_dt_-1",
+									"isMultiKey" : true,
+									"multiKeyPaths" : {
+										"stats.src" : [
+											"stats"
+										],
+										"stats.pct" : [
+											"stats"
+										],
+										"dt" : [ ]
+									},
+									"isUnique" : false,
+									"isSparse" : false,
+									"isPartial" : false,
+									"indexVersion" : 2,
+									"direction" : "forward",
+									"indexBounds" : {
+										"stats.src" : [
+											"[\"mem\", \"mem\"]"
+										],
+										"stats.pct" : [
+											"[90.0, inf.0]"
+										],
+										"dt" : [
+											"[MaxKey, MinKey]"
+										]
+									},
+									"keysExamined" : 149,
+									"seeks" : 1,
+									"dupsTested" : 149,
+									"dupsDropped" : 0,
+									"seenInvalidated" : 0
+								}
+							}
+						]
+					}
+				}
+			}
+		}
+	},
+	"serverInfo" : {
+		"host" : "Kens-MBP",
+		"port" : 27018,
+		"version" : "3.4.9",
+		"gitVersion" : "876ebee8c7dd0e2d992f36a848ff4dc50ee6603e"
+	},
+	"ok" : 1
+}
