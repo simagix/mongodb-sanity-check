@@ -4,10 +4,10 @@ Display the document structure of a collection with redacted data.  The script r
 
 | Data Type | Masked Value |
 | --- | --- |
-| string | "String[_size_]" |
+| string | "String(_size_)" |
 | number | 0 |
 | boolean | false |
-| Date | ISODate("2017-09-11T14:00:00Z") |
+| Date | ISODate("2017-10-19T13:30:00Z") |
 
 [TOC]
 
@@ -40,10 +40,10 @@ and display it as
 	{
 		"ns" : "WSDB.redacts",
 		"schema" : {
-			"a" : "String[39]",
+			"a" : "String(39)",
 			"b" : 0,
 			"c" : false,
-			"d" : ISODate("2017-09-11T14:00:00Z")
+			"d" : ISODate("2017-10-19T13:30:00Z")
 		}
 	}
 ]
