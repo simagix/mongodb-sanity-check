@@ -5,14 +5,15 @@ import (
 	"crypto/rand"
 	"flag"
 	"fmt"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
+
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const head = "_MCHECK_"
@@ -65,11 +66,12 @@ func connectMongo(mongoURI string, tps int, size int, once bool, thread int) {
 				log.Fatal(err)
 			}
 		}
-    elapsed := time.Since(start)
-		log.Printf("INSERT %d %s size %d", tps, elapsed, size)
-    
+		elapsed := time.Since(start)
+		avg := time.Duration(elapsed.Nanoseconds() / int64(tps))
+		log.Printf("INSERT %d %s %s size %d", tps, avg, elapsed, size)
+
 		if once == true {
-      os.Exit(0)
+			os.Exit(0)
 		}
 
 		result := Robot{}
@@ -82,7 +84,8 @@ func connectMongo(mongoURI string, tps int, size int, once bool, thread int) {
 			}
 		}
 		elapsed = time.Since(start)
-		log.Printf("FIND   %d %s with index {name: 1}", tps, elapsed)
+		avg = time.Duration(elapsed.Nanoseconds() / int64(tps))
+		log.Printf("FIND   %d %s %s with index {name: 1}", tps, avg, elapsed)
 
 		result = Robot{}
 		start = time.Now()
@@ -94,7 +97,8 @@ func connectMongo(mongoURI string, tps int, size int, once bool, thread int) {
 			}
 		}
 		elapsed = time.Since(start)
-		log.Printf("FIND   %d %s without index", tps, elapsed)
+		avg = time.Duration(elapsed.Nanoseconds() / int64(tps))
+		log.Printf("FIND   %d %s %s without index", tps, avg, elapsed)
 
 		start = time.Now()
 		for i := bnum; i < (bnum + tps); i++ {
@@ -110,7 +114,8 @@ func connectMongo(mongoURI string, tps int, size int, once bool, thread int) {
 			}
 		}
 		elapsed = time.Since(start)
-		log.Printf("UPDATE %d %s $inc stats.tasked by 1", tps, elapsed)
+		avg = time.Duration(elapsed.Nanoseconds() / int64(tps))
+		log.Printf("UPDATE %d %s %s $inc stats.tasked by 1", tps, avg, elapsed)
 
 		start = time.Now()
 		for i := bnum; i < (bnum + tps); i++ {
@@ -126,7 +131,8 @@ func connectMongo(mongoURI string, tps int, size int, once bool, thread int) {
 			}
 		}
 		elapsed = time.Since(start)
-		log.Printf("UPDATE %d %s $set descr string size of %d", tps, elapsed, size)
+		avg = time.Duration(elapsed.Nanoseconds() / int64(tps))
+		log.Printf("UPDATE %d %s %s $set descr string size of %d", tps, avg, elapsed, size)
 
 		fmt.Println("")
 
@@ -176,7 +182,7 @@ func main() {
 		panic(err)
 	}
 	mcheck = fmt.Sprintf("%s%X", head, buf)
-  fmt.Println("Populate data under database", mcheck)
+	fmt.Println("Populate data under database", mcheck)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
