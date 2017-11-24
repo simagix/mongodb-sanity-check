@@ -8,7 +8,7 @@ A simple load test tool written in GO.  Execute the binary without installing ap
 The script has pre-built for Linux, MacOS, and Windows environments.
 
 #### 1.1. On Linux
-- Download [mcheck-linux-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-linux-x64)
+- Download [mcheck-linux-x64](https://github.com/simagix/mongodb-utils/raw/master/load_test/build/mcheck-linux-x64)
 - Run as, for example
 
   ```
@@ -16,7 +16,7 @@ The script has pre-built for Linux, MacOS, and Windows environments.
   ```
 
 #### 1.2. On OS X
-- Download [mcheck-osx-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-osx-x64)
+- Download [mcheck-osx-x64](https://github.com/simagix/mongodb-utils/raw/master/load_test/build/mcheck-osx-x64)
 - Run as, for example
 
   ```
@@ -24,7 +24,7 @@ The script has pre-built for Linux, MacOS, and Windows environments.
   ```
 
 #### 1.3. On Windows
-- Download [mcheck-win-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-win-x64)
+- Download [mcheck-win-x64.exe](https://github.com/simagix/mongodb-utils/raw/master/load_test/build/mcheck-win-x64.exe)
 - Run as, for example
 
   ```
