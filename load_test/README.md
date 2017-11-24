@@ -5,7 +5,7 @@ A simple load test tool written in GO.  Execute the binary without installing ap
 [TOC]
 
 ### 1. Download and Execute
-The script has pre-built for Linux, MacOS, and Windows environements.
+The script has pre-built for Linux, MacOS, and Windows environments.
 
 #### 1.1. On Linux
 - Download [mcheck-linux-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-linux-x64)
@@ -14,7 +14,7 @@ The script has pre-built for Linux, MacOS, and Windows environements.
   ```
   mcheck-linux-x64 mongodb://localhost:27017
   ```
-  
+
 #### 1.2. On OS X
 - Download [mcheck-osx-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-osx-x64)
 - Run as, for example
@@ -22,7 +22,7 @@ The script has pre-built for Linux, MacOS, and Windows environements.
   ```
   mcheck-osx-x64 mongodb://localhost:27017
   ```
-  
+
 #### 1.3. On Windows
 - Download [mcheck-win-x64](https://github.com/simagix/mongodb-sanity-check/blob/master/build/mcheck-win-x64)
 - Run as, for example
@@ -30,28 +30,47 @@ The script has pre-built for Linux, MacOS, and Windows environements.
   ```
   mcheck-win-x64 mongodb://localhost:27017
   ```
-  
+
+#### 1.4.
+Ctrl-C to stop and to perform cleanup functions
+
 ### 2. Develop, Build, and Execute
 
 ```
-$ go run mcheck.go
-$ go build mcheck.go
-$ ./mcheck
+go run mcheck.go
 ```
 
 #### 2.1. Usage
+There are a couple of usages, and they are
+* Execute a load test
+* See a database for demo
 
 ```
-build/mcheck-osx-x64 -h
-```
-```
+mcheck-osx-x64 -h
+
 Usage of build/mcheck-osx-x64:
   -mongoURI string
     	MongoDB URI (default "mongodb://localhost")
+  -seed
+    	seed a database for demo
+  -size int
+    	document size (default 1024)
   -t int
     	number of threads (default 1)
-  -total int
-    	total ops in a batch (default 1000)
+  -tps int
+    	transactions per second (default 100)
+```
+
+For example, to run a load test, execute command as
+
+```
+mcheck-osx-x64 -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -tps=300
+```
+
+To seed data for demo purpose, add `-seed` to the command line
+
+```
+mcheck-osx-x64 -seed=true -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -tps=300
 ```
 
 #### 2.2. Cross Platforms Compile
