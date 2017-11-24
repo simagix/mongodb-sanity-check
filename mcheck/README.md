@@ -49,6 +49,8 @@ There are a couple of usages, and they are
 mcheck-osx-x64 -h
 
 Usage of build/mcheck-osx-x64:
+  -batch int
+    	ops per batch (default 512)
   -mongoURI string
     	MongoDB URI (default "mongodb://localhost")
   -seed
@@ -57,20 +59,18 @@ Usage of build/mcheck-osx-x64:
     	document size (default 1024)
   -t int
     	number of threads (default 1)
-  -tps int
-    	transactions per second (default 100)
 ```
 
 For example, to run a load test, execute command as
 
 ```
-mcheck-osx-x64 -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -tps=300
+mcheck-osx-x64 -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -batch=300
 ```
 
 To seed data for demo purpose, add `-seed` to the command line
 
 ```
-mcheck-osx-x64 -seed=true -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -tps=300
+mcheck-osx-x64 -seed=true -mongoURI=mongodb://user:pwd@mydatabase:27017?authSource=admin -t=4 -size=4096 -batch=300
 ```
 
 #### 2.2. Cross Platforms Compile
