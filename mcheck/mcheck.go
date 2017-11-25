@@ -36,7 +36,6 @@ type Robot struct {
 }
 
 func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
-	fmt.Println(mongoURI)
 	session, err := mgo.Dial(mongoURI)
 	if err != nil {
 		panic(err)
@@ -146,27 +145,21 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 
 func cleanup(mongoURI string) {
 	fmt.Println("cleanup", mongoURI)
-	session, err := mgo.Dial(mongoURI)
+	session, _ := mgo.Dial(mongoURI)
 	defer session.Close()
-	err = session.DB(mcheck).DropDatabase()
-	if err != nil {
-		panic(err)
-	}
+	session.DB(mcheck).DropDatabase()
 }
 
 func createIndex(mongoURI string) {
 	fmt.Println("createIndex", mongoURI)
-	session, err := mgo.Dial(mongoURI)
+	session, _ := mgo.Dial(mongoURI)
 	defer session.Close()
 	c := session.DB(mcheck).C("robots")
 	index := mgo.Index{
 		Key: []string{"name"},
 	}
 
-	err = c.EnsureIndex(index)
-	if err != nil {
-		panic(err)
-	}
+	c.EnsureIndex(index)
 }
 
 func main() {
@@ -201,5 +194,6 @@ func main() {
 	}
 
 	var input string
+	fmt.Println("Ctrl-C to quit...")
 	fmt.Scanln(&input)
 }
