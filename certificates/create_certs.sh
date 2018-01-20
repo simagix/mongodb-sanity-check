@@ -18,14 +18,10 @@ read -r -d '' DN <<-EOF
 C=US
 ST=Georgia
 L=Atlanta
-O=MongoDB
-OU=CE
-CN=$(hostname -f)
-emailAddress=ken.chen@mongodb.com
-EOF
-
-read -r -d '' ALTNAMES <<-EOF
-DNS.1=localhost
+O=Simagix
+OU=DEV
+CN=localhost
+emailAddress=ken.chen@simagix.com
 EOF
 
 read -r -d '' CADATA <<-EOF
@@ -46,7 +42,8 @@ authorityKeyIdentifier = keyid,issuer
 basicConstraints = CA:TRUE
 
 [alt_names]
-$ALTNAMES
+DNS.1=localhost
+IP.1=127.0.0.1
 EOF
 
 read -r -d '' PEMDATA <<-EOF
@@ -61,10 +58,6 @@ req_extensions = v3_req
 $DN
 
 [v3_req]
-subjectAltName = @alt_names
-
-[alt_names]
-$ALTNAMES
 EOF
 
 read -r -d '' EXTDATA <<-EOF
@@ -74,6 +67,7 @@ subjectAltName = @alt_names
 
 [alt_names]
 DNS.1=localhost
+DNS.2=$(hostname -f)
 EOF
 
 # CA certificates
