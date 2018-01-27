@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
+    "crypto/sha1"
 	"flag"
 	"fmt"
 	"log"
@@ -33,6 +34,11 @@ type Robot struct {
 	Descr    string
 	Stats    Statistics
 	Updated  time.Time
+}
+
+type Brand struct {
+	Name     string
+    Sku      string   
 }
 
 func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
@@ -73,6 +79,15 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 		log.Printf("INSERT %d %s %s size %d", batch, avg, elapsed, size)
 
 		if once == true {
+	        b := session.DB(mcheck).C("brands")
+		    for i := bnum; i < (bnum + batch); i++ {
+			    robot := "Robot-" + strconv.Itoa(i)
+                h := sha1.New()
+			    err = b.Insert(&Brand{robot, fmt.Sprintf("%X", h.Sum(nil))})
+			if err != nil {
+				log.Fatal(err)
+			}
+            }
 			os.Exit(0)
 		}
 
@@ -177,7 +192,10 @@ func main() {
 	if _, err := rand.Read(buf); err != nil {
 		panic(err)
 	}
-	mcheck = fmt.Sprintf("%s%X", head, buf)
+
+    if *seed == false {
+	    mcheck = fmt.Sprintf("%s%X", head, buf)
+    }
 	fmt.Println("Populate data under database", mcheck)
 
 	c := make(chan os.Signal, 2)
