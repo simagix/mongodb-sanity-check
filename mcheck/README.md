@@ -56,7 +56,7 @@ Usage of build/mcheck-osx-x64:
   -seed
     	seed a database for demo
   -size int
-    	document size (default 1024)
+    	document size (default 4096)
   -t int
     	number of threads (default 1)
 ```
