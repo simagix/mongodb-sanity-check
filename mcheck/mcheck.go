@@ -53,8 +53,8 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 	c := session.DB(mcheck).C("robots")
 
 	var buffer bytes.Buffer
-	for i := 0; i < size/len("Simagix."); i++ {
-		buffer.WriteString("Simagix.")
+	for i := 0; i < size/len("simagix."); i++ {
+		buffer.WriteString("simagix.")
 	}
 
 	var newbuf bytes.Buffer
@@ -84,46 +84,40 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 			    robot := "Robot-" + strconv.Itoa(i)
                 h := sha1.New()
 			    err = b.Insert(&Brand{robot, fmt.Sprintf("%X", h.Sum(nil))})
-			if err != nil {
-				log.Fatal(err)
-			}
+			    if err != nil {
+				    log.Fatal(err)
+			    }
             }
 			os.Exit(0)
 		}
 
 		result := Robot{}
+		robot := "Robot-" + strconv.Itoa(bnum+batch/2)
 		start = time.Now()
-		for i := bnum; i < (bnum + batch); i++ {
-			robot := "Robot-" + strconv.Itoa(i)
-			err = c.Find(bson.M{"name": robot}).One(&result)
-			if err != nil {
-				log.Fatal(err)
-			}
+        // find with index
+		err = c.Find(bson.M{"name": robot}).One(&result)
+		if err != nil {
+			log.Fatal(err)
 		}
-		elapsed = time.Since(start)
-		avg = time.Duration(elapsed.Nanoseconds() / int64(batch))
-		log.Printf("FIND   %d %s %s with index {name: 1}", batch, avg, elapsed)
+		elapsed1 := time.Since(start)
+		log.Printf("FIND   %s with index {name: 1}", elapsed1)
 
 		result = Robot{}
+		robot = "Robot-" + strconv.Itoa(bnum+batch/2)
 		start = time.Now()
-		for i := bnum; i < (bnum + batch); i++ {
-			robot := "Robot-" + strconv.Itoa(i)
-			err = c.Find(bson.M{"nickname": robot}).One(&result)
-			if err != nil {
-				log.Fatal(err)
-			}
+        // find without index
+		err = c.Find(bson.M{"nickname": robot}).One(&result)
+		if err != nil {
+			log.Fatal(err)
 		}
-		elapsed = time.Since(start)
-		avg = time.Duration(elapsed.Nanoseconds() / int64(batch))
-		log.Printf("FIND   %d %s %s without index", batch, avg, elapsed)
+		elapsed2 := time.Since(start)
+		log.Printf("FIND   %s without index", elapsed2)
+		totald, _ := c.Count()
+		log.Printf("%d times faster with index from %d documents", elapsed2/elapsed1, totald)
 
 		start = time.Now()
 		for i := bnum; i < (bnum + batch); i++ {
 			robot := "Robot-" + strconv.Itoa(i)
-			err = c.Find(bson.M{"name": robot}).One(&result)
-			if err != nil {
-				log.Fatal(err)
-			}
 			change := bson.M{"$inc": bson.M{"stats.tasked": 1}}
 			err = c.Update(bson.M{"name": robot}, change)
 			if err != nil {
@@ -137,10 +131,6 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 		start = time.Now()
 		for i := bnum; i < (bnum + batch); i++ {
 			robot := "Robot-" + strconv.Itoa(i)
-			err = c.Find(bson.M{"name": robot}).One(&result)
-			if err != nil {
-				log.Fatal(err)
-			}
 			change := bson.M{"$set": bson.M{"descr": newbuf.String()}}
 			err = c.Update(bson.M{"name": robot}, change)
 			if err != nil {
@@ -162,6 +152,7 @@ func cleanup(mongoURI string) {
 	fmt.Println("cleanup", mongoURI)
 	session, _ := mgo.Dial(mongoURI)
 	defer session.Close()
+	fmt.Println("dropping database", mcheck)
 	session.DB(mcheck).DropDatabase()
 }
 
@@ -181,7 +172,7 @@ func main() {
 	batch := flag.Int("batch", 512, "ops per batch")
 	threads := flag.Int("t", 1, "number of threads")
 	mongoURI := flag.String("mongoURI", "mongodb://localhost", "MongoDB URI")
-	size := flag.Int("size", 1024, "document size")
+	size := flag.Int("size", 4096, "document size")
 	seed := flag.Bool("seed", false, "seed a database for demo")
 	flag.Parse()
 	fmt.Println("threads:", *threads)
