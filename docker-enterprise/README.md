@@ -5,7 +5,8 @@
 docker build . -t simagix/mongo:3.6.2-ent
 ```
 
-## To run
+## To Run
 ```
-docker run -i -p 27017:27017 -t simagix/mongo:3.6.2-ent mongod --sslFIPSMode --bind_ip_all
+docker run -i -p 27017:27017 -t simagix/mongo:3.6.2-ent mongod --bind_ip_all
+docker run -i -p 27017:27017 -v $(pwd)/certs/:/etc/ssl/ -t simagix/mongo:3.6.2-ent mongod --bind_ip_all --auth --sslMode requireSSL --sslCAFile /etc/ssl/ca.crt --sslPEMKeyFile /etc/ssl/server.pem --sslFIPSMode
 ```
