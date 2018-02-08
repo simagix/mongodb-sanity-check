@@ -17,5 +17,5 @@ ADD ./mongod.conf /etc/
 VOLUME ["/data/db"]
 
 EXPOSE 27017
-
+USER mongod
 CMD ["/usr/bin/mongod", "-f", "/etc/mongod.conf"]
