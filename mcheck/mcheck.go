@@ -153,6 +153,7 @@ func cleanup(mongoURI string) {
 	session, _ := mgo.Dial(mongoURI)
 	defer session.Close()
 	fmt.Println("dropping database", mcheck)
+    time.Sleep(1 * time.Second)
 	session.DB(mcheck).DropDatabase()
 }
 
