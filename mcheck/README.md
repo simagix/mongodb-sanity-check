@@ -51,6 +51,8 @@ mcheck-osx-x64 -h
 Usage of build/mcheck-osx-x64:
   -batch int
     	ops per batch (default 512)
+  -info
+    	get cluster info
   -mongoURI string
     	MongoDB URI (default "mongodb://localhost")
   -seed
