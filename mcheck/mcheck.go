@@ -192,10 +192,17 @@ func main() {
 	mongoURI := flag.String("mongoURI", "mongodb://localhost", "MongoDB URI")
 	size := flag.Int("size", 4096, "document size")
 	seed := flag.Bool("seed", false, "seed a database for demo")
+	info := flag.Bool("info", false, "get cluster info")
 	flag.Parse()
-	fmt.Println("threads:", *threads)
+	fmt.Println("info:", *info)
 	fmt.Println("MongoDB URI:", *mongoURI)
 	fmt.Println("seed:", *seed)
+	fmt.Println("threads:", *threads)
+
+	adminCommands(*mongoURI)
+    if *info == true {
+		os.Exit(0)
+    }
 
 	buf := make([]byte, 4)
 	if _, err := rand.Read(buf); err != nil {
@@ -205,7 +212,6 @@ func main() {
     if *seed == false {
 	    mcheck = fmt.Sprintf("%s%X", head, buf)
     }
-	adminCommands(*mongoURI)
 	fmt.Println("Populate data under database", mcheck)
 
 	c := make(chan os.Signal, 2)
@@ -213,7 +219,7 @@ func main() {
 	go func() {
 		<-c
 		cleanup(*mongoURI)
-		os.Exit(1)
+		os.Exit(0)
 	}()
 
 	createIndex(*mongoURI)
