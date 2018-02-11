@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
     "crypto/sha1"
+    "encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -169,6 +170,22 @@ func createIndex(mongoURI string) {
 	c.EnsureIndex(index)
 }
 
+func adminCommands(mongoURI string) {
+	session, err := mgo.Dial(mongoURI)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+    session.SetMode(mgo.Monotonic, true)
+    result := bson.M{}
+    if err := session.DB("admin").Run(bson.D{{"isMaster", 1}}, &result); err != nil {
+        panic(err)
+    } else {
+        b, _ := json.MarshalIndent(result, "", "  ")
+        fmt.Println(string(b))
+    }
+}
+
 func main() {
 	batch := flag.Int("batch", 512, "ops per batch")
 	threads := flag.Int("t", 1, "number of threads")
@@ -188,6 +205,7 @@ func main() {
     if *seed == false {
 	    mcheck = fmt.Sprintf("%s%X", head, buf)
     }
+	adminCommands(*mongoURI)
 	fmt.Println("Populate data under database", mcheck)
 
 	c := make(chan os.Signal, 2)
