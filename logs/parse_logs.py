@@ -25,25 +25,24 @@ class MongoDBLogger():
                 if cmd in ['find', 'getMore']:
                     qm = re.match(queryPat, text)
                     if not qm:
-                        #print(text)
                         continue
                     else:
                         filter = qm.group(2)
                         scan = qm.group(4)
-                        # str = '%s %s %s %s %d ms' % (ns, cmd, scan, filter, ms)
-                        #if str not in self.list:
-                        #    self.list.append(str)
                         doc = {'ns': ns, 'cmd': cmd, 'scan': scan, 'filter': filter, 'ms': ms}
                         self.list.append(doc)
-                        # print('* %s %s %s' % (cmd, filter, scan))
-                elif cmd in ['replSetHeartbeat', 'replSetUpdatePosition', 'isMaster']:
-                    continue
-                elif cmd in ['insert']:
-                    continue
+#                elif cmd in ['replSetHeartbeat', 'replSetUpdatePosition', 'isMaster']:
+#                    doc = {'ns': ns, 'cmd': cmd, 'ms': ms}
+#                    self.list.append(doc)
+#                elif cmd in ['insert']:
+#                    doc = {'ns': ns, 'cmd': cmd, 'ms': ms}
+#                    self.list.append(doc)
                 elif cmd in ['update']:
-                    continue
+                    doc = {'ns': ns, 'cmd': cmd, 'ms': ms}
+                    self.list.append(doc)
                 else:
-                    continue
+                    doc = {'ns': ns, 'cmd': cmd, 'ms': ms}
+                    self.list.append(doc)
 
         sort_on = 'ms'
         decorated = [(dict_[sort_on], dict_) for dict_ in self.list]
@@ -54,7 +53,7 @@ class MongoDBLogger():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", default='mongod.log', help="input file")
+    parser.add_argument("-f", "--file", help="input file")
     parser.add_argument("-n", "--topn", default=20, help="input file")
     args = parser.parse_args()
 
