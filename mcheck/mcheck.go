@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
-    "crypto/sha1"
-    "encoding/json"
+	"crypto/sha1"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -38,8 +38,8 @@ type Robot struct {
 }
 
 type Brand struct {
-	Name     string
-    Sku      string   
+	Name string
+	Sku  string
 }
 
 func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
@@ -80,33 +80,40 @@ func connectMongo(mongoURI string, batch int, size int, once bool, thread int) {
 		log.Printf("INSERT %d %s %s size %d", batch, avg, elapsed, size)
 
 		if once == true {
-	        b := session.DB(mcheck).C("brands")
-		    for i := bnum; i < (bnum + batch); i++ {
-			    robot := "Robot-" + strconv.Itoa(i)
-                h := sha1.New()
-			    err = b.Insert(&Brand{robot, fmt.Sprintf("%X", h.Sum(nil))})
-			    if err != nil {
-				    log.Fatal(err)
-			    }
-            }
+			b := session.DB(mcheck).C("brands")
+			for i := bnum; i < (bnum + batch); i++ {
+				robot := "Robot-" + strconv.Itoa(i)
+				h := sha1.New()
+				err = b.Insert(&Brand{robot, fmt.Sprintf("%X", h.Sum(nil))})
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
 			os.Exit(0)
 		}
 
 		result := Robot{}
 		robot := "Robot-" + strconv.Itoa(bnum+batch/2)
 		start = time.Now()
-        // find with index
+		// aggregate with index
+		pipe := c.Pipe([]bson.M{{"$match": bson.M{"name": robot}}})
+		resp := []bson.M{}
+		err := pipe.All(&resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		elapsed0 := time.Since(start)
+		log.Printf("MATCH  %s with index {name: 1}", elapsed0)
+		start = time.Now()
+		// find with index
 		err = c.Find(bson.M{"name": robot}).One(&result)
 		if err != nil {
 			log.Fatal(err)
 		}
 		elapsed1 := time.Since(start)
 		log.Printf("FIND   %s with index {name: 1}", elapsed1)
-
-		result = Robot{}
-		robot = "Robot-" + strconv.Itoa(bnum+batch/2)
 		start = time.Now()
-        // find without index
+		// find without index
 		err = c.Find(bson.M{"nickname": robot}).One(&result)
 		if err != nil {
 			log.Fatal(err)
@@ -154,7 +161,7 @@ func cleanup(mongoURI string) {
 	session, _ := mgo.Dial(mongoURI)
 	defer session.Close()
 	fmt.Println("dropping database", mcheck)
-    time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 	session.DB(mcheck).DropDatabase()
 }
 
@@ -176,14 +183,14 @@ func adminCommands(mongoURI string) {
 		panic(err)
 	}
 	defer session.Close()
-    session.SetMode(mgo.Monotonic, true)
-    result := bson.M{}
-    if err := session.DB("admin").Run(bson.D{{"isMaster", 1}}, &result); err != nil {
-        panic(err)
-    } else {
-        b, _ := json.MarshalIndent(result, "", "  ")
-        fmt.Println(string(b))
-    }
+	session.SetMode(mgo.Monotonic, true)
+	result := bson.M{}
+	if err := session.DB("admin").Run(bson.D{{"isMaster", 1}}, &result); err != nil {
+		panic(err)
+	} else {
+		b, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(b))
+	}
 }
 
 func main() {
@@ -200,18 +207,18 @@ func main() {
 	fmt.Println("threads:", *threads)
 
 	adminCommands(*mongoURI)
-    if *info == true {
+	if *info == true {
 		os.Exit(0)
-    }
+	}
 
 	buf := make([]byte, 4)
 	if _, err := rand.Read(buf); err != nil {
 		panic(err)
 	}
 
-    if *seed == false {
-	    mcheck = fmt.Sprintf("%s%X", head, buf)
-    }
+	if *seed == false {
+		mcheck = fmt.Sprintf("%s%X", head, buf)
+	}
 	fmt.Println("Populate data under database", mcheck)
 
 	c := make(chan os.Signal, 2)
