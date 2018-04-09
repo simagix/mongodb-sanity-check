@@ -9,6 +9,7 @@ class MongoDBLogger():
         pattern = '^(\d+-\d+-\d+T\d+:\d+:\d+.\d+)(\S+) (.?) (\S+)\s+\[\S+\] (.*) (\d+)ms$'
         pattern = '^(\d+-\d+-\d+T\d+:\d+:\d+.\d+)(\S+) (.?) (\S+)\s+\[\S+\] command (\S+) command: (\S+) (.*) (\d+)ms$'
         queryPat = '^(.*) filter: ({.*? }), (.*) planSummary: (\S+) (.*)'
+        aggregatePat = '^(.*) \$match: ({ .* }) \],(.*) planSummary: (\S+) (.*)'
 
         with open(filename) as f:
             lines = f.readlines()
@@ -31,6 +32,15 @@ class MongoDBLogger():
                         scan = qm.group(4)
                         doc = {'ns': ns, 'cmd': cmd, 'scan': scan, 'filter': filter, 'ms': ms}
                         self.list.append(doc)
+                elif cmd in ['aggregate']:
+                    am = re.match(aggregatePat, text)
+                    if not am:
+                        continue
+                    else:
+                        filter = am.group(2)
+                        scan = am.group(4)
+                        doc = {'ns': ns, 'cmd': cmd, 'scan': scan, 'filter': filter, 'ms': ms}
+                        self.list.append(doc)
 #                elif cmd in ['replSetHeartbeat', 'replSetUpdatePosition', 'isMaster']:
 #                    doc = {'ns': ns, 'cmd': cmd, 'ms': ms}
 #                    self.list.append(doc)
@@ -47,14 +57,16 @@ class MongoDBLogger():
         sort_on = 'ms'
         decorated = [(dict_[sort_on], dict_) for dict_ in self.list]
         decorated.sort(reverse=True)
-        mlist = decorated[:args.topn]
+        mlist = decorated
+        if args.topn > 0:
+            mlist = decorated[:args.topn]
         for item in mlist:
             print(item)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="input file")
-    parser.add_argument("-n", "--topn", default=20, help="input file")
+    parser.add_argument("-n", "--topn", type=int, default=20, help="input file")
     args = parser.parse_args()
 
     if not args.file:
