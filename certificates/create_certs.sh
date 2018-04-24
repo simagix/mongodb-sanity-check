@@ -20,7 +20,7 @@ ST=Georgia
 L=Atlanta
 O=Simagix
 OU=DEV
-CN=localhost
+CN=root
 emailAddress=ken.chen@simagix.com
 EOF
 
@@ -56,6 +56,24 @@ $DN
 [v3_req]
 EOF
 
+read -r -d '' CLIENT_PEMDATA <<-EOF
+[req]
+default_bits = 2048
+prompt = no
+distinguished_name = dn
+default_md = x509
+req_extensions = v3_req
+[dn]
+C=US
+ST=Georgia
+L=Atlanta
+O=Simagix
+OU=DEV-client
+CN=root
+emailAddress=ken.chen@simagix.com
+[v3_req]
+EOF
+
 # CA certificates
 # echo "Creating server certificate and key file: ca.crt and ca.key"
 openssl req -nodes -x509 -days 365 -newkey rsa:2048 -keyout ca.key -out ca.crt -config <(
@@ -87,7 +105,7 @@ cat server.key server.crt > server.pem
 # echo "Creating client certificate and key file: client.crt and client.key"
 openssl req -nodes -newkey rsa:2048 -keyout client.key -out client.csr -config <(
 cat <<-EOF
-$PEMDATA
+$CLIENT_PEMDATA
 EOF
 )
 openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAserial ca.srl -days 365 -out client.crt -extfile <(

@@ -1,4 +1,4 @@
-### Start a sharded MongoDB cluster with TLS/SSL Encryption
+# Start a sharded MongoDB cluster with TLS/SSL Encryption
 
 Usage: `create_certs.sh [dir]`
 
@@ -11,7 +11,7 @@ Usage: `create_certs.sh [dir]`
 └── create_certs.sh
 ```
 
-#### Generate Certificates
+## Generate Certificates
 
 - Generate `ca.crt`
 - Generate `server.key` and `server.csr`
@@ -52,7 +52,7 @@ Getting CA Private Key
 Creating client PEM file: cat client.key client.crt > client.pem
 ```
 
-#### Start MongoDB sharded cluster
+## Start MongoDB sharded cluster
 ```
 $ mlaunch init --replicaset --nodes 3 --sharded 2 --auth --sslPEMKeyFile certs/server.pem --sslMode allowSSL --sslCAFile certs/ca.crt --sslClientPEMKeyFile certs/client.pem --sslClientCertificate certs/client.crt
 
@@ -80,7 +80,7 @@ launching: mongos on port 27017
 Username "user", password "password"
 ```
 
-#### Connect from Client
+## Connect from Client
 ```
 $ mongo mongodb://user:password@localhost/test?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.crt
 
@@ -121,4 +121,59 @@ mongos> sh.status()
         {  "_id" : "config",  "primary" : "config",  "partitioned" : true }
 
 mongos>
+```
+
+## X509 Authentication
+### Server Cert
+```
+openssl x509 -in certs/client.pem -noout -text
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 15382977918881725567 (0xd57b50ea2a9f7c7f)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=root/emailAddress=ken.chen@simagix.com
+...
+```
+
+### Client Cert
+```
+openssl x509 -in certs/client.pem -noout -text
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 15382977918881725567 (0xd57b50ea2a9f7c7f)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=root/emailAddress=ken.chen@simagix.com
+...
+```
+
+### Create User in `$external`
+```
+mongo mongodb://user:password@localhost/admin?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.crt
+
+db.getSisterDB("$external").runCommand(
+  {
+    createUser:"emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US" , 
+    roles: [{role: 'root    ', db: 'admin' }] 
+  }
+)
+```
+
+### Authenticate using X509
+```
+mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem
+
+db.getSisterDB("$external").auth( 
+  { 
+    mechanism: "MONGODB-X509", 
+    user:"emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US" 
+  }
+)
+```
+
+or
+
+```
+mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem --authenticationMechanism MONGODB-X509 --authenticationDatabase "\$external" -u "emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US"
 ```
