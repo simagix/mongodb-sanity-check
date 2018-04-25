@@ -20,8 +20,8 @@ ST=Georgia
 L=Atlanta
 O=Simagix
 OU=DEV
-CN=root
-emailAddress=ken.chen@simagix.com
+CN=localhost
+emailAddress=admin@simagix.com
 EOF
 
 read -r -d '' CADATA <<-EOF
@@ -68,8 +68,8 @@ C=US
 ST=Georgia
 L=Atlanta
 O=Simagix
-OU=DEV-client
-CN=root
+OU=Consulting
+CN=ken.chen
 emailAddress=ken.chen@simagix.com
 [v3_req]
 EOF

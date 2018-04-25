@@ -127,24 +127,36 @@ mongos>
 ### Server Cert
 ```
 openssl x509 -in certs/client.pem -noout -text
+
 Certificate:
     Data:
         Version: 3 (0x2)
-        Serial Number: 15382977918881725567 (0xd57b50ea2a9f7c7f)
+        Serial Number: 10459429611566710654 (0x91275bd0b6a2bf7e)
     Signature Algorithm: sha1WithRSAEncryption
-        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=root/emailAddress=ken.chen@simagix.com
+        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=localhost/emailAddress=admin@simagix.com
+        Validity
+            Not Before: Apr 25 11:30:07 2018 GMT
+            Not After : Apr 25 11:30:07 2019 GMT
+        Subject: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=localhost/emailAddress=admin@simagix.com
 ...
+
+mongod --dbpath data --logpath data/mongod.log --fork --sslCAFile certs/ca.crt --sslPEMKeyFile certs/server.pem --auth --sslMode requireSSL
 ```
 
 ### Client Cert
 ```
 openssl x509 -in certs/client.pem -noout -text
+
 Certificate:
     Data:
         Version: 3 (0x2)
-        Serial Number: 15382977918881725567 (0xd57b50ea2a9f7c7f)
+        Serial Number: 10459429611566710655 (0x91275bd0b6a2bf7f)
     Signature Algorithm: sha1WithRSAEncryption
-        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=root/emailAddress=ken.chen@simagix.com
+        Issuer: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=localhost/emailAddress=admin@simagix.com
+        Validity
+            Not Before: Apr 25 11:30:08 2018 GMT
+            Not After : Apr 25 11:30:08 2019 GMT
+        Subject: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=Consulting, CN=ken.chen/emailAddress=ken.chen@simagix.com
 ...
 ```
 
@@ -154,8 +166,8 @@ mongo mongodb://user:password@localhost/admin?authSource=admin --ssl --sslPEMKey
 
 db.getSisterDB("$external").runCommand(
   {
-    createUser:"emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US" , 
-    roles: [{role: 'root    ', db: 'admin' }] 
+    createUser:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US" , 
+    roles: [{role: 'root', db: 'admin' }] 
   }
 )
 ```
@@ -167,7 +179,7 @@ mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/clie
 db.getSisterDB("$external").auth( 
   { 
     mechanism: "MONGODB-X509", 
-    user:"emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US" 
+    user:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US" 
   }
 )
 ```
@@ -175,5 +187,5 @@ db.getSisterDB("$external").auth(
 or
 
 ```
-mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem --authenticationMechanism MONGODB-X509 --authenticationDatabase "\$external" -u "emailAddress=ken.chen@simagix.com,CN=root,OU=DEV-client,O=Simagix,L=Atlanta,ST=Georgia,C=US"
+mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem --authenticationMechanism MONGODB-X509 --authenticationDatabase "\$external" -u "emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US"
 ```
