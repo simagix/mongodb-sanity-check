@@ -96,7 +96,8 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 [alt_names]
 DNS.1=localhost
-DNS.2=$(hostname -f)
+DNS.2=127.0.0.1
+DNS.3=$(hostname -f)
 EOF
 )
 cat server.key server.crt > server.pem
