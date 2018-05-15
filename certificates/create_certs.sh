@@ -3,14 +3,32 @@
 # author: Ken Chen
 # create certificates with alternative names
 #
-PWD=$(pwd)
-if [ "$1" = "" ]; then
-    TMP=$PWD
+while getopts ":c:" o; do
+    case "${o}" in
+        c)
+            CA=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "$*" ]; then
+    IFS=', ' read -r -a hostnames <<< $(hostname -f)
 else
-    TMP=$1
+    hostnames=$@
 fi
 
+TMP=$(pwd)
 mkdir -p $TMP/certs
+rm -f $TMP/certs/*.pem
+
+if [ "$CA" != "" ]; then
+    cp $CA $TMP/certs/ca.pem || exit
+fi
+
 cd $TMP/certs
 echo "Files are created in $TMP/certs"
 
@@ -76,31 +94,41 @@ EOF
 
 # CA certificates
 # echo "Creating server certificate and key file: ca.crt and ca.key"
-openssl req -nodes -x509 -days 365 -newkey rsa:2048 -keyout ca.key -out ca.crt -config <(
-cat <<-EOF
-$CADATA
-EOF
-)
+if [ "$CA" == "" ]; then
+	openssl req -nodes -x509 -days 365 -newkey rsa:2048 -keyout ca.key -out ca.crt -config <(
+	cat <<-EOF
+	$CADATA
+	EOF
+	)
+	cat ca.crt ca.key > ca.pem
+fi
 
 # Server certificates
-openssl req -nodes -newkey rsa:2048 -keyout server.key -out server.csr -config <(
-cat <<-EOF
-$PEMDATA
-EOF
-)
+for hostname in $hostnames
+do
+	openssl req -nodes -newkey rsa:2048 -keyout server.key -out server.csr -config <(
+	cat <<-EOF
+	$PEMDATA
+	EOF
+	)
+	
+	openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.pem -CAcreateserial -days 365 -out server.crt -extfile <(
+	cat <<-EOF
+	basicConstraints = CA:FALSE
+	keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+	subjectAltName = @alt_names
+	[alt_names]
+	DNS.1=localhost
+	DNS.2=127.0.0.1
+	DNS.3=$hostname
+	EOF
+	)
+	cat server.key server.crt > ${hostname}.pem
 
-openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -days 365 -out server.crt -extfile <(
-cat <<-EOF
-basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-subjectAltName = @alt_names
-[alt_names]
-DNS.1=localhost
-DNS.2=127.0.0.1
-DNS.3=$(hostname -f)
-EOF
-)
-cat server.key server.crt > server.pem
+    if [ "$hostname" == "$(hostname -f)" ]; then
+        cp ${hostname}.pem server.pem
+    fi
+done
 
 # Client certificates
 # echo "Creating client certificate and key file: client.crt and client.key"
@@ -109,7 +137,7 @@ cat <<-EOF
 $CLIENT_PEMDATA
 EOF
 )
-openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAserial ca.srl -days 365 -out client.crt -extfile <(
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.pem -CAserial ca.srl -days 365 -out client.crt -extfile <(
 cat <<-EOF
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
@@ -117,5 +145,6 @@ EOF
 )
 cat client.key client.crt > client.pem
 
-ls -l $TMP/certs/ca.crt $TMP/certs/server.pem $TMP/certs/client.pem
+rm -f $(ls | grep -v '.pem$')
 cd $PWD
+ls -l $TMP/certs/
