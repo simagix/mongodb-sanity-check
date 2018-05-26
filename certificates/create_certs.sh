@@ -141,6 +141,7 @@ openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.pem -CAserial ca.srl -days
 cat <<-EOF
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = TLS Web Server Authentication, TLS Web Client Authentication
 EOF
 )
 cat client.key client.crt > client.pem
