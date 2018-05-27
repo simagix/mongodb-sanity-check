@@ -3,6 +3,26 @@
 # author: Ken Chen
 # create certificates with alternative names
 #
+usage() {
+    echo "Usage: $0 [-c <ca.pem>] [host ...]" 1>&2
+
+cat << EOF
+
+Environment variables
+	C   country
+	ST  state
+	L   local/city
+	O   organization/company
+	OU_SERVER   organization unit/group - server
+	OU_CLIENT   organization unit/group - client
+	CN_SERVER   common name
+	CN_CLIENT   common name
+	EMAIL_ADM   admin email
+	EMAIL_CLIENT    client email
+EOF
+    exit 1
+}
+
 while getopts ":c:" o; do
     case "${o}" in
         c)
@@ -32,14 +52,25 @@ fi
 cd $TMP/certs
 echo "Files are created in $TMP/certs"
 
+C="${C:-US}"
+ST="${ST:-Georgia}"
+L="${L:-Atlanta}"
+O="${O:-Simagix}"
+OU_SERVER="${OU_SERVER:-DEV}"
+OU_CLIENT="${OU_CLIENT:-Consulting}"
+CN_SERVER="${CN_SERVER:-localhost}"
+CN_CLIENT="${CN_CLIENT:-ken.chen}"
+EMAIL_ADM="${EMAIL_ADM:-admin@simagix.com}"
+EMAIL_CLIENT="${EMAIL_CLIENT:-ken.chen@simagix.com}"
+
 read -r -d '' DN <<-EOF
-C=US
-ST=Georgia
-L=Atlanta
-O=Simagix
-OU=DEV
-CN=localhost
-emailAddress=admin@simagix.com
+C=$C
+ST=$ST
+L=$L
+O=$O
+OU=$OU_SERVER
+CN=$CN_SERVER
+emailAddress=$EMAIL_ADM
 EOF
 
 read -r -d '' CADATA <<-EOF
@@ -82,13 +113,13 @@ distinguished_name = dn
 default_md = x509
 req_extensions = v3_req
 [dn]
-C=US
-ST=Georgia
-L=Atlanta
-O=Simagix
-OU=Consulting
-CN=ken.chen
-emailAddress=ken.chen@simagix.com
+C=$C
+ST=$ST
+L=$L
+O=$O
+OU=$OU_CLIENT
+CN=$CN_CLIENT
+emailAddress=$EMAIL_CLIENT
 [v3_req]
 EOF
 
