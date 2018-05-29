@@ -1,4 +1,8 @@
-<h3>MongoDB Load Test</h3>
+# This repo is replaced by [simagix/keyhole](https://github.com/simagix/keyhole)
+
+
+
+# MongoDB Load Test
 
 A simple load test tool written in GO.  Execute the binary without installing application (such as Java, Python, and/or other 3pp software).
 
