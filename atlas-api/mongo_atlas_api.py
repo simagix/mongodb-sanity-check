@@ -28,6 +28,12 @@ def processOrg(_link):
                 print response.text
         return
 
+    if None == doc.get("links"):
+        if doc.get("errorCode") != None:
+            print doc["errorCode"]
+            print response.text
+        return
+
     for link in doc['links']:
         if search == "groups" and link['rel'] == "http://mms.mongodb.com/groups":
             processLinks(link['href'])
