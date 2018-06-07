@@ -81,6 +81,29 @@ def processGroups(result, name):
         else:
             print "|%-30s| %s | %s|" % (doc["name"], doc["created"], doc["orgId"])
 
+'''
+processUsers list users
+'''
+def processUsers(result, name):
+    for doc in result['links']:
+        link = doc['href']
+        link = link + "?pretty=true"
+        response = requests.get(link, auth=HTTPDigestAuth(user, key))
+        str = response.text
+        doc = json.loads(response.content)
+
+        if verbose == True:
+            try:
+                for link in doc['links']:
+                    response = requests.get(link['href'] + "?pretty=true", auth=HTTPDigestAuth(user, key))
+                    print(response.text)
+            except:
+                print str
+                pass
+        else:
+            print "user: %s, email: %s, name: %s %s" % (doc["username"], doc["emailAddress"], doc["firstName"], doc["lastName"])
+            for role in doc["roles"]:
+                print "\t" + json.dumps(role)
 
 def processLink(result, name):
     print 'Retrieving ' + result[name]
@@ -120,7 +143,7 @@ def processLinks(link):
         elif search == "teams":
             processLink(result, 'name')
         elif search == "users":
-            processLink(result, 'username')
+            processUsers(result, 'username')
 
     if search == "groups" and verbose == False:
         printGroupTail()
