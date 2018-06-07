@@ -11,6 +11,7 @@ user = ''
 key = ''
 org = ''
 search = ''
+verbose = False
 
 '''
 processInvoices writes invoices to csv filesself.
@@ -58,6 +59,29 @@ def processOrg(_link):
         #else:
         #    print link['href']
 
+'''
+processGroups list projects
+'''
+def processGroups(result, name):
+    for doc in result['links']:
+        link = doc['href']
+        link = link + "?pretty=true"
+        response = requests.get(link, auth=HTTPDigestAuth(user, key))
+        str = response.text
+        doc = json.loads(response.content)
+
+        if verbose == True:
+            try:
+                for link in doc['links']:
+                    response = requests.get(link['href'] + "?pretty=true", auth=HTTPDigestAuth(user, key))
+                    print(response.text)
+            except:
+                print str
+                pass
+        else:
+            print "|%-30s| %s | %s|" % (doc["name"], doc["created"], doc["orgId"])
+
+
 def processLink(result, name):
     print 'Retrieving ' + result[name]
     for doc in result['links']:
@@ -74,18 +98,32 @@ def processLink(result, name):
             print str
             pass
 
+def printGroupHead():
+    print "+------------------------------+----------------------+-------------------------+"
+    print "| Project                      | Created              | Org ID                  |"
+    print "+------------------------------+----------------------+-------------------------+"
+
+
+def printGroupTail():
+    print "+------------------------------+----------------------+-------------------------+"
+
 def processLinks(link):
     link = link + "?pretty=true"
     response = requests.get(link, auth=HTTPDigestAuth(user, key))
     #print(response.text)
     doc = json.loads(response.content)
+    if search == "groups" and verbose == False:
+        printGroupHead()
     for result in doc['results']:
         if search == "groups":
-            processLink(result, 'name')
+            processGroups(result, 'name')
         elif search == "teams":
             processLink(result, 'name')
         elif search == "users":
             processLink(result, 'username')
+
+    if search == "groups" and verbose == False:
+        printGroupTail()
 
 def printResults(link):
     link = link + "?pretty=true"
@@ -93,7 +131,7 @@ def printResults(link):
     print(response.text)
 
 if __name__ == "__main__":
-    options, remainder = getopt.getopt(sys.argv[1:], 'u:k:s:o:', ['user=', 'key=', 'search=', 'org='])
+    options, remainder = getopt.getopt(sys.argv[1:], 'u:k:s:o:v', ['user=', 'key=', 'search=', 'org=', 'verbose'])
     for opt, arg in options:
         if opt in ('-u', '--user'):
             user = arg
@@ -103,6 +141,8 @@ if __name__ == "__main__":
             search = arg
         elif opt in ('-o', '--org'):
             org = arg
+        elif opt in ('-v', '--verbose'):
+            verbose = True
 
     if search not in ["invoices", "groups", "teams", "users"]:
         print "Invalid search: " + search
