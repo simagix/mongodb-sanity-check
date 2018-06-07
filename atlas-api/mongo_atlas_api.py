@@ -12,20 +12,34 @@ key = ''
 org = ''
 search = ''
 
+'''
+processInvoices writes invoices to csv filesself.
+'''
+def processInvoices(link):
+    link = link + "/invoices" + "?pretty=true"
+    response = requests.get(link, auth=HTTPDigestAuth(user, key))
+    doc = json.loads(response.content)
+    for result in doc['results']:
+        #print("From %s to %s, Status: %s, Billed: %d, Paid: %d" %
+        #    (result['created'], result['endDate'], result['status'], result['amountBilledCents'], result['amountPaidCents']))
+        for ilink in result['links']:
+            response = requests.get(ilink['href'], auth=HTTPDigestAuth(user, key))
+            for line in response:
+                invoiceNumber = line.split()[1].split(',')[1]
+                fname = "invoices-" + invoiceNumber.strip() + ".csv"
+                break
+
+            print "Write data to " + fname
+            idx = response.text.find("Date,Description")
+            with open(fname, "w") as f:
+                f.write(response.text[idx:])
+
 def processOrg(_link):
     link = _link + "?pretty=true"
     response = requests.get(link, auth=HTTPDigestAuth(user, key))
     doc = json.loads(response.content)
     if search == "invoices":
-        link = _link + "/invoices" + "?pretty=true"
-        response = requests.get(link, auth=HTTPDigestAuth(user, key))
-        doc = json.loads(response.content)
-        for result in doc['results']:
-            #print("From %s to %s, Status: %s, Billed: %d, Paid: %d" %
-            #    (result['created'], result['endDate'], result['status'], result['amountBilledCents'], result['amountPaidCents']))
-            for ilink in result['links']:
-                response = requests.get(ilink['href'], auth=HTTPDigestAuth(user, key))
-                print response.text
+        processInvoices(_link)
         return
 
     if None == doc.get("links"):
@@ -59,7 +73,7 @@ def processLink(result, name):
         except:
             print str
             pass
-    
+
 def processLinks(link):
     link = link + "?pretty=true"
     response = requests.get(link, auth=HTTPDigestAuth(user, key))
@@ -110,4 +124,3 @@ if __name__ == "__main__":
     for result in doc['results']:
         for link in result['links']:
             processOrg(link['href'])
-
