@@ -101,7 +101,7 @@ def processUsers(result, name):
                 print str
                 pass
         else:
-            print "user: %s, email: %s, name: %s %s" % (doc["username"], doc["emailAddress"], doc["firstName"], doc["lastName"])
+            print "user: %s, email: %s, name: %s %s, id: %s" % (doc["username"], doc["emailAddress"], doc["firstName"], doc["lastName"], doc["id"])
             for role in doc["roles"]:
                 print "\t" + json.dumps(role)
 
