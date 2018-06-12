@@ -79,7 +79,10 @@ def processGroups(result, name):
                 print str
                 pass
         else:
-            print "|%-30s| %s | %s|" % (doc["name"], doc["created"], doc["orgId"])
+            if None != doc.get("name"):
+                print "|%-30s| %s | %s|" % (doc["name"], doc["created"], doc["orgId"])
+            else:
+                print response.text
 
 '''
 processUsers list users
