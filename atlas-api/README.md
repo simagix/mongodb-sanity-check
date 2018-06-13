@@ -97,8 +97,6 @@ mongoexport --port 30097 -d example -c invoices --type=csv --fieldFile=fields \
     --query='{"Project ID":"5bc2ccbd4f65817a1671f0e7","Date":{"$gte":"04/01/2018","$lt":"05/01/2018"}}' \
     > project-5bc2ccbd4f65817a1671f0e7.csv
 ```
-5ab2bbac4e65817f1671e0d7
-5bc2ccbd4f65817a1671f0e7
 
 #### Get Data of All Projects to Different Files
 
