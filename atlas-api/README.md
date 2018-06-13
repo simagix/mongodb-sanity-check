@@ -106,7 +106,7 @@ for pid in $(mongo --quiet --port 30097 example \
 do
     mongoexport --port 30097 -d example -c invoices --type=csv --fieldFile=fields \
         --query="{'Project ID':'$pid','Date':{'\$gte':'04/01/2018','\$lt':'05/01/2018'}}" \
-        > project-$pid-2018-04.csv
+        --sort="{'Date': 1}" > project-$pid-2018-04.csv
 done
 ```
 
