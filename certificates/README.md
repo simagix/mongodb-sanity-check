@@ -1,6 +1,24 @@
 # Start a sharded MongoDB cluster with TLS/SSL Encryption
 
-Usage: `create_certs.sh [dir]`
+## Usage
+```
+$ ./create_certs.sh --help
+Usage: ./create_certs.sh [-c <ca.pem>] [host ...]
+
+Environment variables
+	C   country
+	ST  state
+	L   local/city
+	O   organization/company
+	OU_SERVER   organization unit/group - server
+	OU_CLIENT   organization unit/group - client
+	CN_SERVER   common name
+	CN_CLIENT   common name
+	EMAIL_ADM   admin email
+	EMAIL_CLIENT    client email
+```
+
+### Files
 
 ```
 ├── README.md
