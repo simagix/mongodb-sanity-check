@@ -154,7 +154,12 @@ do
 	DNS.3=$hostname
 	EOF
 	)
-	cat server.key server.crt > ${hostname}.pem
+
+    if [ "${hostname:0:2}" == "*." ]; then
+	    cat server.key server.crt > ${hostname:2}.pem
+    else
+	    cat server.key server.crt > ${hostname}.pem
+    fi
 
     if [ "$hostname" == "$(hostname -f)" ]; then
         cp ${hostname}.pem server.pem
