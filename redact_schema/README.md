@@ -1,3 +1,10 @@
+Replaced by [simagix/keyhole](https://github.com/simagix/keyhole), for example
+
+```
+keyhole --uri mongodb://localhost/WSDB --schema --collection redacts
+```
+
+
 <h3>Display Redacted Schema</h3>
 
 Display the document structure of a collection with redacted data.  The script redacts/masks data as follows:
