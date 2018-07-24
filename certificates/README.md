@@ -23,56 +23,15 @@ Environment variables
 ```
 ├── README.md
 ├── certs
-│   ├── ca.crt
+│   ├── ca.pem
 │   ├── client.pem
 │   └── server.pem
 └── create_certs.sh
 ```
 
-## Generate Certificates
-
-- Generate `ca.crt`
-- Generate `server.key` and `server.csr`
-- Sign `server.csr` with `ca.crt`
-- Create `server.pem` from `server.crt` and `server.key`
-- Generate `client.key` and `client.csr`
-- Sign `client.csr` with `ca.crt`
-- Create `client.pem` from `client.crt` and `client.key`
-
-```
-$ create_certs.sh $(pwd)
-
-Files are created in /Users/kenchen/tmp/temp/certs
-Creating server certificate and key file: ca.crt and ca.key
-Generating a 2048 bit RSA private key
-.........................+++
-...........................................+++
-writing new private key to 'ca.key'
------
-Generating a 2048 bit RSA private key
-..+++
-.............+++
-writing new private key to 'server.key'
------
-Signature ok
-subject=/C=US/ST=Georgia/L=Atlanta/O=MongoDB/OU=CE/CN=Kens-MacBook-Pro.local/emailAddress=ken.chen@mongodb.com
-Getting CA Private Key
-Creating server PEM file: cat server.key server.crt > server.pem
-Creating client certificate and key file: client.crt and client.key
-Generating a 2048 bit RSA private key
-........................................................+++
-..........+++
-writing new private key to 'client.key'
------
-Signature ok
-subject=/C=US/ST=Georgia/L=Atlanta/O=MongoDB/OU=CE/CN=Kens-MacBook-Pro.local/emailAddress=ken.chen@mongodb.com
-Getting CA Private Key
-Creating client PEM file: cat client.key client.crt > client.pem
-```
-
 ## Start MongoDB sharded cluster
 ```
-$ mlaunch init --replicaset --nodes 3 --sharded 2 --auth --sslPEMKeyFile certs/server.pem --sslMode allowSSL --sslCAFile certs/ca.crt --sslClientPEMKeyFile certs/client.pem --sslClientCertificate certs/client.crt
+$ mlaunch init --replicaset --nodes 3 --sharded 2 --auth --sslPEMKeyFile certs/server.pem --sslMode allowSSL --sslCAFile certs/ca.pem --sslClientPEMKeyFile certs/client.pem --sslClientCertificate certs/client.crt
 
 launching: mongod on port 27018
 launching: mongod on port 27019
@@ -100,7 +59,7 @@ Username "user", password "password"
 
 ## Connect from Client
 ```
-$ mongo mongodb://user:password@localhost/test?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.crt
+$ mongo mongodb://user:password@localhost/test?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.pem
 
 MongoDB shell version v3.6.2
 connecting to: mongodb://localhost/test?authSource=admin
@@ -158,7 +117,7 @@ Certificate:
         Subject: C=US, ST=Georgia, L=Atlanta, O=Simagix, OU=DEV, CN=localhost/emailAddress=admin@simagix.com
 ...
 
-mongod --dbpath data --logpath data/mongod.log --fork --sslCAFile certs/ca.crt --sslPEMKeyFile certs/server.pem --auth --sslMode requireSSL
+mongod --dbpath data --logpath data/mongod.log --fork --sslCAFile certs/ca.pem --sslPEMKeyFile certs/server.pem --auth --sslMode requireSSL
 ```
 
 ### Client Cert
@@ -180,7 +139,7 @@ Certificate:
 
 ### Create User in `$external`
 ```
-mongo mongodb://user:password@localhost/admin?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.crt
+mongo mongodb://user:password@localhost/admin?authSource=admin --ssl --sslPEMKeyFile certs/client.pem --sslCAFile certs/ca.pem
 
 db.getSisterDB("$external").runCommand(
   {
@@ -192,7 +151,7 @@ db.getSisterDB("$external").runCommand(
 
 ### Authenticate using X509
 ```
-mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem
+mongo --host localhost --sslCAFile certs/ca.pem --ssl --sslPEMKeyFile certs/client.pem
 
 db.getSisterDB("$external").auth( 
   { 
@@ -205,5 +164,5 @@ db.getSisterDB("$external").auth(
 or
 
 ```
-mongo --host localhost --sslCAFile certs/ca.crt --ssl --sslPEMKeyFile certs/client.pem --authenticationMechanism MONGODB-X509 --authenticationDatabase "\$external" -u "emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US"
+mongo --host localhost --sslCAFile certs/ca.pem --ssl --sslPEMKeyFile certs/client.pem --authenticationMechanism MONGODB-X509 --authenticationDatabase "\$external" -u "emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US"
 ```
