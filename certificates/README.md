@@ -3,7 +3,7 @@
 ## Usage
 ```
 $ ./create_certs.sh --help
-Usage: ./create_certs.sh [-c <ca.pem>] [host ...]
+Usage: ./create_certs.sh [-c <ca.pem>] [-o <output dir>] [host ...]
 
 Environment variables
 	C   country
@@ -23,6 +23,7 @@ Environment variables
 ```
 ├── README.md
 ├── certs
+│   ├── ca.crt
 │   ├── ca.pem
 │   ├── client.pem
 │   └── server.pem
@@ -143,8 +144,8 @@ mongo mongodb://user:password@localhost/admin?authSource=admin --ssl --sslPEMKey
 
 db.getSisterDB("$external").runCommand(
   {
-    createUser:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US" , 
-    roles: [{role: 'root', db: 'admin' }] 
+    createUser:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US" ,
+    roles: [{role: 'root', db: 'admin' }]
   }
 )
 ```
@@ -153,10 +154,10 @@ db.getSisterDB("$external").runCommand(
 ```
 mongo --host localhost --sslCAFile certs/ca.pem --ssl --sslPEMKeyFile certs/client.pem
 
-db.getSisterDB("$external").auth( 
-  { 
-    mechanism: "MONGODB-X509", 
-    user:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US" 
+db.getSisterDB("$external").auth(
+  {
+    mechanism: "MONGODB-X509",
+    user:"emailAddress=ken.chen@simagix.com,CN=ken.chen,OU=Consulting,O=Simagix,L=Atlanta,ST=Georgia,C=US"
   }
 )
 ```

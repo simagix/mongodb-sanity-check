@@ -4,7 +4,7 @@
 # create certificates with alternative names
 #
 usage() {
-    echo "Usage: $0 [-c <ca.pem>] [host ...]" 1>&2
+    echo "Usage: $0 [-c <ca.pem>] [-o <output dir>] [host ...]" 1>&2
 
 cat << EOF
 
@@ -23,10 +23,15 @@ EOF
     exit 1
 }
 
-while getopts ":c:" o; do
+CERTS_DIR="./certs"
+
+while getopts ":c:o:" o; do
     case "${o}" in
         c)
             CA=${OPTARG}
+            ;;
+        o)
+            CERTS_DIR=${OPTARG}
             ;;
         *)
             usage
@@ -41,23 +46,32 @@ else
     hostnames=$@
 fi
 
-TMP=$(pwd)
-mkdir -p $TMP/certs
-rm -f $TMP/certs/*.pem
-
-if [ "$CA" != "" ]; then
-    cp $CA $TMP/certs/ca.pem || exit
+if [ -d "$CERTS_DIR" ]; then
+    echo -n "Directory $CERTS_DIR exists, override [y/N]? "
+    read y
+    if [ "$y" == "y" ]; then
+        rm -f $CERTS_DIR/*
+    else
+        exit
+    fi
+else
+    mkdir -p $CERTS_DIR
 fi
 
-cd $TMP/certs
-echo "Files are created in $TMP/certs"
+if [ "$CA" != "" ]; then
+    cp $CA $CERTS_DIR/ca.pem || exit
+fi
+
+OPWD=$(pwd)
+cd $CERTS_DIR
+echo "Files are created in $CERTS_DIR"
 
 C="${C:-US}"
 ST="${ST:-Georgia}"
 L="${L:-Atlanta}"
 O="${O:-Simagix}"
-OU_SERVER="${OU_SERVER:-DEV}"
-OU_CLIENT="${OU_CLIENT:-Consulting}"
+OU_SERVER="${OU_SERVER:-Root}"
+OU_CLIENT="${OU_CLIENT:-Root}"
 CN_SERVER="${CN_SERVER:-localhost}"
 CN_CLIENT="${CN_CLIENT:-ken.chen}"
 EMAIL_ADM="${EMAIL_ADM:-admin@simagix.com}"
@@ -132,6 +146,10 @@ if [ "$CA" == "" ]; then
 	EOF
 	)
 	cat ca.crt ca.key > ca.pem
+    rm -f ca.key
+else
+    echo "extracting ca.crt"
+    openssl crl2pkcs7 -nocrl -certfile ca.pem | openssl pkcs7 -print_certs -out ca.crt || exit
 fi
 
 # Server certificates
@@ -160,6 +178,7 @@ do
     else
 	    cat server.key server.crt > ${hostname}.pem
     fi
+    rm -f server.csr server.crt server.key
 
     if [ "$hostname" == "$(hostname -f)" ]; then
         cp ${hostname}.pem server.pem
@@ -181,7 +200,13 @@ extendedKeyUsage = TLS Web Server Authentication, TLS Web Client Authentication
 EOF
 )
 cat client.key client.crt > client.pem
+rm -f client.csr client.crt client.key
+rm -f ca.srl
+# rm -f $(ls | egrep -v '.pem$')
 
-rm -f $(ls | grep -v '.pem$')
-cd $PWD
-ls -l $TMP/certs/
+if [ "$CA" != "" ]; then
+    rm -f ca.pem
+fi
+
+cd $OPWD
+ls -l $CERTS_DIR
