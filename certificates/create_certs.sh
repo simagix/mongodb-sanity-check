@@ -9,16 +9,13 @@ usage() {
 cat << EOF
 
 Environment variables
-	C   country
-	ST  state
-	L   local/city
-	O   organization/company
+	C           country
+	ST          state
+	L           local/city
+	O           organization/company
 	OU_SERVER   organization unit/group - server
-	OU_CLIENT   organization unit/group - client
-	CN_SERVER   common name
-	CN_CLIENT   common name
-	EMAIL_ADM   admin email
-	EMAIL_CLIENT    client email
+	OU_USER     organization unit/group - client
+	CN_USER     common name
 EOF
     exit 1
 }
@@ -66,25 +63,20 @@ OPWD=$(pwd)
 cd $CERTS_DIR
 echo "Files are created in $CERTS_DIR"
 
+DAYS="${DAYS:-365}"
 C="${C:-US}"
 ST="${ST:-Georgia}"
 L="${L:-Atlanta}"
 O="${O:-Simagix}"
-OU_SERVER="${OU_SERVER:-Root}"
-OU_CLIENT="${OU_CLIENT:-Root}"
-CN_SERVER="${CN_SERVER:-localhost}"
-CN_CLIENT="${CN_CLIENT:-ken.chen}"
-EMAIL_ADM="${EMAIL_ADM:-admin@simagix.com}"
-EMAIL_CLIENT="${EMAIL_CLIENT:-ken.chen@simagix.com}"
+OU_SERVER="${OU_SERVER:-Servers}"
+OU_USER="${OU_USER:-Users}"
+CN_USER="${CN_USER:-admin@simagix.com}"
 
 read -r -d '' DN <<-EOF
 C=$C
 ST=$ST
 L=$L
 O=$O
-OU=$OU_SERVER
-CN=$CN_SERVER
-emailAddress=$EMAIL_ADM
 EOF
 
 read -r -d '' CADATA <<-EOF
@@ -96,6 +88,8 @@ default_md = x509
 x509_extensions = v3_req
 [dn]
 $DN
+OU=Root
+CN=$(hostname -f)
 [v3_req]
 subjectAltName = @alt_names
 subjectKeyIdentifier = hash
@@ -114,9 +108,10 @@ prompt = no
 distinguished_name = dn
 default_md = x509
 req_extensions = v3_req
+[v3_req]
 [dn]
 $DN
-[v3_req]
+OU=$OU_SERVER
 EOF
 
 read -r -d '' CLIENT_PEMDATA <<-EOF
@@ -131,16 +126,15 @@ C=$C
 ST=$ST
 L=$L
 O=$O
-OU=$OU_CLIENT
-CN=$CN_CLIENT
-emailAddress=$EMAIL_CLIENT
+OU=$OU_USER
+CN=$CN_USER
 [v3_req]
 EOF
 
 # CA certificates
 # echo "Creating server certificate and key file: ca.crt and ca.key"
 if [ "$CA" == "" ]; then
-	openssl req -nodes -x509 -days 365 -newkey rsa:2048 -keyout ca.key -out ca.crt -config <(
+	openssl req -nodes -x509 -days ${DAYS} -newkey rsa:2048 -keyout ca.key -out ca.crt -config <(
 	cat <<-EOF
 	$CADATA
 	EOF
@@ -158,10 +152,11 @@ do
 	openssl req -nodes -newkey rsa:2048 -keyout server.key -out server.csr -config <(
 	cat <<-EOF
 	$PEMDATA
+    CN=$hostname
 	EOF
 	)
 	
-	openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.pem -CAcreateserial -days 365 -out server.crt -extfile <(
+	openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.pem -CAcreateserial -days ${DAYS} -out server.crt -extfile <(
 	cat <<-EOF
 	basicConstraints = CA:FALSE
 	keyUsage = nonRepudiation, digitalSignature, keyEncipherment
@@ -192,7 +187,7 @@ cat <<-EOF
 $CLIENT_PEMDATA
 EOF
 )
-openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.pem -CAserial ca.srl -days 365 -out client.crt -extfile <(
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.pem -CAserial ca.srl -days ${DAYS} -out client.crt -extfile <(
 cat <<-EOF
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
