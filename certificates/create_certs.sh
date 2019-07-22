@@ -3,6 +3,10 @@
 # author: Ken Chen
 # create certificates with alternative names
 #
+echo; echo; echo; 
+echo "* An enhanced script is at https://github.com/simagix/mongo-x509 repository."
+echo; echo; echo; sleep 10
+
 usage() {
     echo "Usage: $0 [-c <ca.pem>] [-o <output dir>] [host ...]" 1>&2
 

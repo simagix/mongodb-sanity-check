@@ -1,5 +1,7 @@
 # Start a sharded MongoDB cluster with TLS/SSL Encryption
 
+** An enhanced script is at [mongo-x509](https://github.com/simagix/mongo-x509) repository.**
+
 ## Usage
 ```
 $ ./create_certs.sh --help
